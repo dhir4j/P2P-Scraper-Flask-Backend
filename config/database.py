@@ -4,7 +4,6 @@ import os
 
 class DatabaseConfig:
     DATABASE_PATH = "database"
-    FIAT_MAPPING_FILE = os.path.join(DATABASE_PATH, "fiat2country.json")
     
     @staticmethod
     def get_db_connection(exchange_name):
@@ -15,13 +14,14 @@ class DatabaseConfig:
         return sqlite3.connect(db_path)
     
     @staticmethod
-    def load_country_fiat_mapping():
-        """Load country-to-fiat mapping from JSON file"""
+    def load_country_fiat_mapping(exchange_name):
+        """Load country-to-fiat mapping from the exchange-specific JSON file"""
+        fiat_mapping_file = os.path.join(DatabaseConfig.DATABASE_PATH, exchange_name, "fiat2country.json")
         try:
-            with open(DatabaseConfig.FIAT_MAPPING_FILE, "r") as f:
+            with open(fiat_mapping_file, "r") as f:
                 return json.load(f)
         except FileNotFoundError:
-            raise FileNotFoundError(f"Fiat mapping file not found: {DatabaseConfig.FIAT_MAPPING_FILE}")
+            raise FileNotFoundError(f"Fiat mapping file not found: {fiat_mapping_file}")
         except json.JSONDecodeError:
             raise ValueError("Invalid JSON format in fiat mapping file")
     

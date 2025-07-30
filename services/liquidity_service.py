@@ -9,7 +9,6 @@ class LiquidityService:
         conn = DatabaseConfig.get_db_connection(exchange_name)
         cursor = conn.cursor()
         
-        # Query to fetch relevant data from the exchange's database
         query = f"""
         SELECT price, available_amount, payment_methods
         FROM {fiat_table}
@@ -33,7 +32,6 @@ class LiquidityService:
             
             processed = False
             
-            # Check if 'Bank Transfer' is in payment methods
             if "Bank Transfer" in payment_methods:
                 if any("bank" in method.lower() for method in methods_set):
                     if not processed:
@@ -41,7 +39,6 @@ class LiquidityService:
                         weighted_price_sum += price * available_amount
                         processed = True
             
-            # Handle other payment methods independently
             if not processed and methods_set.intersection(payment_methods):
                 total_liquidity += available_amount
                 weighted_price_sum += price * available_amount
@@ -55,9 +52,9 @@ class LiquidityService:
         }
     
     @staticmethod
-    def get_fiat_table_by_country(country):
-        """Get fiat table name from country name"""
-        COUNTRY_TO_FIAT = DatabaseConfig.load_country_fiat_mapping()
+    def get_fiat_table_by_country(country, exchange_name):
+        """Get fiat table name from country name using the exchange-specific mapping"""
+        COUNTRY_TO_FIAT = DatabaseConfig.load_country_fiat_mapping(exchange_name)
         
         for fiat, mapped_country in COUNTRY_TO_FIAT.items():
             if mapped_country.lower() == country.lower():
